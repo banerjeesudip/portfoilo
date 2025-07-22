@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sudip Banerjee | Cryosphere & Hazard Research</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <!-- Font Awesome CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    :root {
+      --bg-color: #f0f5f9;
+      --text-color: #333;
+      --primary-color: #0f4c75;
+      --secondary-color: #3282b8;
+      --section-bg: #fff;
+    }
+    body.dark-mode {
+      --bg-color: #1e1e1e;
+      --text-color: #e0e0e0;
+      --primary-color: #90caf9;
+      --secondary-color: #2196f3;
+      --section-bg: #2c2c2c;
+    }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      transition: background 0.5s, color 0.5s;
+    }
+    header {
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      color: #fff;
+      text-align: center;
+      padding: 50px 20px;
+      position: relative;
+    }
+    header img {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      margin-top: 20px;
+      border: 4px solid #fff;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      transition: transform 0.5s;
+    }
+    header img:hover {
+      transform: scale(1.1);
+    }
+    header h1 {
+      margin: 10px 0;
+      font-size: 2.8em;
+      font-weight: 700;
+    }
+    header p {
+      font-size: 1.2em;
+      max-width: 600px;
+      margin: 10px auto;
+      opacity: 0.9;
+    }
+    #dark-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #fff;
+      color: var(--primary-color);
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    #dark-toggle:hover {
+      background: var(--secondary-color);
+      color: #fff;
+    }
+    section {
+      max-width: 1100px;
+      margin: auto;
+      padding: 50px 20px;
+      background: var(--section-bg);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      transition: background 0.5s;
+    }
+    section h2 {
+      color: var(--primary-color);
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2em;
+    }
+    .collapsible {
+      background: var(--secondary-color);
+      color: #fff;
+      cursor: pointer;
+      padding: 18px;
+      width: 100%;
+      border: none;
+      text-align: left;
+      outline: none;
+      font-size: 1.1em;
+      border-radius: 5px;
+      margin-top: 10px;
+      transition: background 0.3s;
+    }
+    .collapsible.active, .collapsible:hover {
+      background: var(--primary-color);
+    }
+    .content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease-out;
+      background: var(--section-bg);
+      margin-bottom: 15px;
+      border-radius: 5px;
+      padding: 0 18px;
+    }
+    .content p, .content ul {
+      margin: 15px 0;
+      line-height: 1.6;
+    }
+    .skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    .skill {
+      background: var(--secondary-color);
+      color: #fff;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 0.95em;
+      transition: transform 0.3s;
+    }
+    .skill:hover {
+      transform: scale(1.1);
+    }
+    #map {
+      width: 100%;
+      height: 400px;
+      border-radius: 10px;
+      margin-top: 30px;
+    }
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+    }
+    .project-card {
+      background: var(--section-bg);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .project-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+    .project-card .icon {
+      font-size: 50px;
+      color: var(--primary-color);
+      margin-bottom: 15px;
+    }
+    .project-card h3 {
+      color: var(--primary-color);
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+    .project-card p {
+      font-size: 0.95em;
+      margin-bottom: 10px;
+    }
+    .project-card ul {
+      text-align: left;
+      display: inline-block;
+      list-style: none;
+      padding: 0;
+      margin: 10px 0;
+    }
+    .project-card ul li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 8px;
+    }
+    .project-card ul li::before {
+      content: "\f058";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      color: var(--secondary-color);
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    .project-card a {
+      display: inline-block;
+      margin-top: 15px;
+      background: var(--primary-color);
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .project-card a:hover {
+      background: var(--secondary-color);
+    }
+    footer {
+      background: var(--primary-color);
+      color: #fff;
+      text-align: center;
+      padding: 30px 20px;
+      margin-top: 30px;
+    }
+    footer a {
+      color: #bbe1fa;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    a {
+      color: var(--secondary-color);
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+    a:hover {
+      color: var(--primary-color);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <button id="dark-toggle">Toggle Dark Mode</button>
+    <img src="your-photo.jpg" alt="Sudip Banerjee Photo" />
+    <h1>Sudip Banerjee</h1>
+    <p>Remote Sensing • Cryosphere Research • Multi-Hazard Modelling</p>
+  </header>
+
+  <section id="about">
+    <h2>About Me</h2>
+    <p>
+      I’m a remote sensing specialist focused on cryospheric hazards, multi-hazard modelling, and machine learning applications. My work has led me to develop innovative tools like the Glacial Lake Monitoring System (GLMS) and win national awards including the IIT Bombay FOSSEE Mapathon. I’m passionate about transforming satellite data into actionable insights for hazard resilience.
+    </p>
+  </section>
+
+  <section id="details">
+    <h2>My Profile</h2>
+
+    <button class="collapsible">Work Experience</button>
+    <div class="content">
+      <p><strong>Research Internship (Remote)</strong><br>
+      Selected for an Internship at Spatial Data Lab, Harvard University, U.S.A<br>
+      <a href="https://sdl.gis.harvard.edu/" target="_blank">Visit SDL Website</a></p>
+    </div>
+
+    <button class="collapsible">Education</button>
+    <div class="content">
+      <ul>
+        <li><strong>M.Tech in Remote Sensing (Cryosphere)</strong> – BIT Mesra – 2023 (CGPA 9.14)</li>
+        <li><strong>Masters in Geography (Remote Sensing & GIS)</strong> – Panjab University – 2021</li>
+        <li><strong>B.A. (Hons) Geography</strong> – Sidho Kanho Birsha University – 2018 (CGPA 8.2)</li>
+      </ul>
+    </div>
+
+    <button class="collapsible">Honours & Awards</button>
+    <div class="content">
+      <ul>
+        <li>1st Runner-Up at Himashield-2024 Hackathon</li>
+        <li>Champion at IIT Bombay FOSSEE Geospatial Mapathon 2024</li>
+        <li>DGCA Certified Drone Pilot</li>
+        <li>Qualified UGC NET 2023</li>
+        <li>Qualified GATE 2024 (Geomatics Engineering)</li>
+      </ul>
+    </div>
+
+    <button class="collapsible">Skills</button>
+    <div class="content">
+      <div class="skills">
+        <div class="skill">ArcGIS</div>
+        <div class="skill">QGIS</div>
+        <div class="skill">ENVI</div>
+        <div class="skill">HEC-RAS</div>
+        <div class="skill">Google Earth Engine</div>
+        <div class="skill">Python</div>
+        <div class="skill">Cryosphere Hazard Analysis</div>
+      </div>
+    </div>
+
+    <button class="collapsible">Languages</button>
+    <div class="content">
+      <ul>
+        <li>English – Advanced (C1)</li>
+        <li>Bengali – Bilingual (C2)</li>
+        <li>Hindi – Bilingual (C2)</li>
+        <li>Punjabi – Intermediate (B1)</li>
+      </ul>
+    </div>
+
+    <button class="collapsible">Publications</button>
+    <div class="content">
+      <ul>
+        <li>Spatio-Temporal Variation of Vegetation Cover in Southwestern Bengal Basin (Submitted)</li>
+        <li>GLOF Risk Assessment & Hydrodynamic Simulation of Lassar Yankti Basin (Submitted)</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="projects">
+    <h2>Key Projects</h2>
+    <div class="project-grid">
+
+      <div class="project-card">
+        <div class="icon"><i class="fas fa-mountain"></i></div>
+        <h3>GLMS – Glacial Lake Monitoring System</h3>
+        <p>Developed a web-based GEE app for glacier lake detection, monitoring, and hazard prediction. Awarded 1st Runner-Up at Himashield-2024 Hackathon (₹3 Lakh prize).</p>
+        <ul>
+          <li>Machine learning integration</li>
+          <li>Time-series charts (1990–2024)</li>
+          <li>Potential for patenting</li>
+        </ul>
+        <a href="https://ee-banerjeesudip420.projects.earthengine.app/view/glmsfinal" target="_blank">View Demo <i class="fas fa-external-link-alt"></i></a>
+      </div>
+
+      <div class="project-card">
+        <div class="icon"><i class="fas fa-water"></i></div>
+        <h3>Maban Lake GLOF Hazard Assessment</h3>
+        <p>Hydrodynamic flood simulation for Maban Lake in Lassar Yankti Basin using HEC-RAS 1D/2D models. Selected for Indian Cryosphere Meet (ICM) 2025.</p>
+        <ul>
+          <li>HEC-RAS 1D/2D modelling</li>
+          <li>Risk and vulnerability mapping</li>
+          <li>DEM terrain analysis</li>
+        </ul>
+      </div>
+
+      <div class="project-card">
+        <div class="icon"><i class="fas fa-award"></i></div>
+        <h3>IIT Bombay FOSSEE Mapathon</h3>
+        <p>Champion among 2,919 teams in India’s leading open-source geospatial challenge. Developed GLOF hazard risk mapping for Kumaon Himalaya.</p>
+        <ul>
+          <li>Open-source GIS solutions</li>
+          <li>Remote sensing integration</li>
+          <li>High-resolution hazard maps</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="map-section">
+    <h2>My Study Areas</h2>
+    <div id="map"></div>
+  </section>
+
+  <section id="contact">
+    <h2>Contact</h2>
+    <p style="text-align:center;">
+      Email: <a href="mailto:contacts.sudipbanerjee@gmail.com">contacts.sudipbanerjee@gmail.com</a><br>
+      Phone: +91 8250441754<br>
+      LinkedIn: <a href="https://www.linkedin.com/in/sudip-banerjee-72b83b20a/" target="_blank">Visit Profile</a>
+    </p>
+  </section>
+
+  <footer>
+    &copy; 2025 Sudip Banerjee | Cryosphere & Hazard Research
+  </footer>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    var map = L.map('map').setView([30.25, 80.85], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: 'Map data © OpenStreetMap contributors'
+    }).addTo(map);
+    L.marker([30.55, 80.91]).addTo(map)
+      .bindPopup("<b>Maban Lake</b><br>Site of GLOF hazard modelling.");
+    L.marker([29.94, 79.59]).addTo(map)
+      .bindPopup("<b>Kumaon Himalaya</b><br>GLMS hazard monitoring region.");
+
+    var coll = document.getElementsByClassName("collapsible");
+    for (let i = 0; i < coll.length; i++) {
+      coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.maxHeight) {
+          content.style.maxHeight = null;
+        } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+        }
+      });
+    }
+
+    document.getElementById("dark-toggle").addEventListener("click", function() {
+      document.body.classList.toggle("dark-mode");
+      localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
+    });
+
+    if (localStorage.getItem("darkMode") === "true") {
+      document.body.classList.add("dark-mode");
+    }
+  </script>
+
+</body>
+</html>
